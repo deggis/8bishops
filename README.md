@@ -6,7 +6,7 @@ Quick'n'dirty solver for finding required moves to move 4 white and 4 black bish
  * board size is 5x4
  * bishops move diagonally
  * bishops can't move through existing bishops
- * in no position bishop should be put to a position where it can be attacked by enemy color
+ * a bishop should never be put to a position where it can be attacked by the enemy color
 
 Starting position:
 
