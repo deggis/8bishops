@@ -40,10 +40,9 @@ And one possible way to continue:
 Algorithm
 ---------
 
-This solver implemented with Haskell and is essentially breadth-first search (BFS) with a small twist: only boards that are completely unseen before are added. Previously seen board states are kept in a Set, which requires clumsy feeling Ord instance for board.
+This solver is implemented with Haskell and is essentially breadth-first search (BFS) with a small twist: only boards that are completely unseen before are added. Previously seen boards are kept in a Set, which requires clumsy (and slow) feeling Ord instance for board.
 
-The whole thing runs on Haskell lists. I'm a bit puzzled that on top of the naive/initial pure BFS solution that Set is enough to have this thing run in sufficient time. This solver goes through 9842 boards in 0.6 s before finding solution that requires 36 steps.
-
+I'm a bit puzzled that on top of the naive/initial pure BFS solution that Set is enough to have this thing run in sufficient time. This solver goes through 9842 boards in 0.6 s before finding a solution that requires 36 steps.
 
 
 
@@ -52,4 +51,4 @@ Other
 -----
 
  * Author: Heikki Salo
- * License: public domain
+ * License: Public domain
