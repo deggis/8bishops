@@ -44,7 +44,7 @@ This solver is implemented with Haskell and is essentially breadth-first search 
 
 I'm a bit puzzled that on top of the naive/initial pure BFS solution that Set is enough to have this thing run in sufficient time. This solver goes through 9842 boards in 0.6 s before finding a solution that requires 36 steps.
 
-
+But hey, they say that perfect is the enemy of done (or good) :-)
 
 
 Other
