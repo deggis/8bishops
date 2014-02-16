@@ -41,9 +41,11 @@ data Board = Board [Piece]
 getColor :: Board -> Color -> [Piece]
 getColor (Board pieces) c = filter (\(Piece _ c') -> c == c') pieces
 
-enemy :: Piece -> Color
-enemy (Piece _ Black) = White
-enemy (Piece _ White) = Black
+enemy :: Color -> Color
+enemy Black = White
+enemy White = Black
+
+pieceEnemy (Piece _ c) = enemy c
 
 pieces (Board p) = p
 
@@ -84,7 +86,7 @@ validMoves :: Board -> Piece -> [Position]
 validMoves board@(Board pieces) piece =
     let positions = map position pieces
         (orig_x, orig_y) = position piece
-        enemyPositions   = map position . getColor board . enemy $ piece
+        enemyPositions   = map position . getColor board . pieceEnemy $ piece
         isFree others p@(x,y) = not $ elem p others
         notUnderAttack p = all (isFree enemyPositions) (diagonalPositions p)
     in [ p | p@(x,y) <- diagonalPositions (orig_x, orig_y),
@@ -104,16 +106,16 @@ movePiece (Board pieces) from to = Board . sort . map locate $ pieces
   where locate p@(Piece pos c) | pos == from = (Piece to c)
                                | otherwise   = p
 
-mutate :: Board -> [Board]
-mutate b@(Board pieces) =
+mutate :: Board -> Color -> [Board]
+mutate b color =
     let pieceMoves from = zip (repeat from) $ validMoves b from
-        allMoves   = concatMap pieceMoves pieces
+        allMoves   = concatMap pieceMoves . getColor b $ color
     in map (\(from, to) -> movePiece b (position from) to) allMoves
 
 type Step = Board
 
-advance :: Int -> S.Set Board -> [[Board]] -> IO (S.Set Board, [[Board]])
-advance 0 allBoards solutionPaths = do
+advance :: Int -> Color -> S.Set Board -> [[Board]] -> IO (S.Set Board, [[Board]])
+advance 0 turn allBoards solutionPaths = do
         putStrLn $ concat ["  ", show (S.size allBoards), " boards"]
         let best = head . sortBy (comparing (evaluateBoard . head)) $ solutionPaths
             fitness = evaluateBoard . head $ best
@@ -121,14 +123,14 @@ advance 0 allBoards solutionPaths = do
         putStrLn ("Best: " ++ show fitness)
         putStrLn "Done"
         return (allBoards, solutionPaths)
-advance steps allBoards solutionPaths = do
+advance steps turn allBoards solutionPaths = do
         putStrLn $ concat ["  ", show (S.size allBoards), " boards"]
         let (newAllBoards, newSolutionPaths) = go allBoards [] solutionPaths
-        advance (steps-1) newAllBoards newSolutionPaths
+        advance (steps-1) (enemy turn) newAllBoards newSolutionPaths
   where go all newSolutions [] = (all, newSolutions)
         go all newSolutions (x:xs) =
            let (lastSituation:prev) = x
-               newBoards = filter (\e -> not $ S.member e all) $ mutate lastSituation
+               newBoards = filter (\e -> not $ S.member e all) $ mutate lastSituation turn
                all' = foldr S.insert all newBoards
                newPaths = map (\b -> (b:lastSituation:prev)) newBoards
            in go all' (newPaths++newSolutions) xs
@@ -138,4 +140,4 @@ printPath = mapM_ (\b -> print b >> putStrLn " ") . reverse
 
 main = do
   [no] <- getArgs
-  advance (read no) (S.singleton startingBoard) [[startingBoard]]
+  advance (read no) White (S.singleton startingBoard) [[startingBoard]]
